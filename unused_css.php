@@ -3,7 +3,7 @@
 Plugin Name: Unused CSS
 Description: Removes unused CSS from WordPress sites
 Author: Leon Chevalier
-Version: 0.01.0
+Version: 0.02.0
 Text Domain: unused-css
 Author URI: https://github.com/acid-drop
 */

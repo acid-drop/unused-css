@@ -338,7 +338,7 @@ class CSSUsageCollector {
         
                 // Handle the response
                 const responseData = await response.json();
-                console.log('Successfully updated config:', responseData);
+                console.log('Successfully updated CSS:', responseData);
             } catch (error) {
                 console.error('Error updating config:', error);
             }

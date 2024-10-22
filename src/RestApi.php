@@ -148,7 +148,7 @@ class RestApi {
         }
 
         Speed\CSS::process_css($json['css'], $json['url'], $json['post_id'], $json['post_types']);
-        echo "{}";
+        echo json_encode(['reduction' => number_format( $json['reduction'], 2)]);
         die();
     }
 
