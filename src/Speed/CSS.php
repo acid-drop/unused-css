@@ -115,10 +115,57 @@ class CSS {
         //Refresh cache
         if($post_id) {
             $post_object = get_post( $post_id );
+
+            self::remove_non_cache_purge_clean_hooks_from_post_updated();
             do_action( 'post_updated', (int) $post_id, $post_object, $post_object );
         }
 
     }    
+
+
+    /**
+     * Removes non-cache/purge/clean hooks from the 'post_updated' action.
+     *
+     * This function is used internally by the CSS class to remove hooks that
+     * are not related to cache, purge, or clean operations when the
+     * 'post_updated' action is triggered.
+     *
+     */
+    private static function remove_non_cache_purge_clean_hooks_from_post_updated() {
+        global $wp_filter;
+    
+        // Define the regex pattern to match 'cache', 'purge', or 'clean'
+        $pattern = '/cache|purge|clean/i'; // Case-insensitive pattern
+    
+        // Check if 'post_updated' action exists
+        if (isset($wp_filter['post_updated'])) {
+            $hooks = $wp_filter['post_updated'];
+    
+            // Loop through each priority level
+            foreach ($hooks->callbacks as $priority => $functions) {
+                foreach ($functions as $hook_key => $function) {
+                    // Determine the function name
+                    $function_name = '';
+    
+                    if (is_string($function['function'])) {
+                        // Simple function
+                        $function_name = $function['function'];
+                    } elseif (is_array($function['function'])) {
+                        // Class method
+                        $class_name = is_object($function['function'][0]) ? get_class($function['function'][0]) : $function['function'][0];
+                        $method_name = $function['function'][1];
+                        $function_name = $class_name . '::' . $method_name;
+                    }
+    
+                    // Use regex to check if the function name matches the pattern 'cache', 'purge', or 'clean'
+                    if (!preg_match($pattern, $function_name)) {
+                        // If it doesn't match the pattern, remove the action
+                        remove_action('post_updated', $function['function'], $priority);
+                    }
+                }
+            }
+        }
+    }
 
 
     /**

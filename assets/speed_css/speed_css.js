@@ -326,6 +326,11 @@ class CSSUsageCollector {
                 // Convert the input data to a JSON string and compress it
                 const inputStr = JSON.stringify(data);
                 const base64CompressedData = await this.compressAndBase64Encode(inputStr);
+
+                if(base64CompressedData == false) {
+                    console.warn('Unable to update CSS on this browser');
+                    return;
+                }
         
                 // Send the compressed data via fetch
                 const response = await fetch('/wp-json/unused-css/update_css', {
@@ -389,20 +394,29 @@ class CSSUsageCollector {
     
         // Collect the compressed chunks into an array
         const chunks = [];
-        for await (const chunk of compressedStream) {
-        chunks.push(chunk);
+        try {
+
+            for await (const chunk of compressedStream) {
+            chunks.push(chunk);
+            }
+
+            // Concatenate the chunks into a single Uint8Array
+            const compressedData = await this.concatUint8Arrays(chunks);
+        
+            // Convert the Uint8Array to a binary string for base64 encoding
+            const binaryString = String.fromCharCode(...compressedData);
+        
+            // Base64-encode the binary string
+            const base64String = btoa(binaryString);
+        
+            return base64String;
+
+
+        } catch (error) {
+            //Doesn't work on this browser
+            return false;
         }
     
-        // Concatenate the chunks into a single Uint8Array
-        const compressedData = await this.concatUint8Arrays(chunks);
-    
-        // Convert the Uint8Array to a binary string for base64 encoding
-        const binaryString = String.fromCharCode(...compressedData);
-    
-        // Base64-encode the binary string
-        const base64String = btoa(binaryString);
-    
-        return base64String;
     }
   
     /**
